@@ -1,0 +1,64 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+  http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+	<bean id="accountBean" class="com.sunilos.spring.bean.Account" />
+
+	<!-- create customer bean and inject account bean using constructor injection -->
+	<bean id="customerBean" class="com.sunilos.spring.bean.Customer"
+		init-method="init" destroy-method="destroy">
+		<constructor-arg name="account" ref="accountBean"></constructor-arg>
+	</bean>
+
+	<bean id="roleBean" class="com.sunilos.spring.bean.Role" />
+
+	<!-- create user bean and inject role bean using setter injection -->
+	<bean id="userBean" class="com.sunilos.spring.bean.User">
+		<property name="firstName" value="SunilOS" />
+		<!--Inject role bean using setter injection -->
+		<property name="role" ref="roleBean" />
+	</bean>
+
+
+	<!-- Spring DAO configuration -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/TEST11" />
+		<property name="username" value="root" />
+		<property name="password" value="root" />
+	</bean>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan" value="com.sunilos.spring" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">
+					org.hibernate.dialect.MariaDB53Dialect
+				</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="hibernateTransactionManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<!-- enables annotation based transaction -->
+	<tx:annotation-driven transaction-manager="hibernateTransactionManager" />
+
+	<!--Scan @Component, @Repository, @Service,and @Controller spring beans -->
+	<context:component-scan base-package="com.sunilos.spring" />
+</beans>
